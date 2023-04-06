@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, HttpResponse
+from django.shortcuts import render, redirect, HttpResponse, HttpResponseRedirect
 import plotly.io as pi
 import datetime as dt
 from datetime import timezone
@@ -59,13 +59,7 @@ def company(request):
     #convert dates to str
     start_date = dt.datetime.strftime(end_date-pd.DateOffset(years= 10), '%Y-%m-%d')
     end_date = dt.datetime.strftime(end_date, '%Y-%m-%d')
-    # start_date = end_date-pd.DateOffset(years= 10)
-    # start_date = start_date.date()
-    # print(history)
-    # print(history.index)
-    # print(type(history.index))
-    # print("start date", start_date, type(start_date))
-    # print("end date", end_date, type(end_date))
+
     candle_plot = pi.to_html(    
         plot_candlestick(history.loc[start_date: end_date]), 
         full_html=False, 
@@ -123,8 +117,7 @@ def company(request):
 
 def update(request):
     
-    #update company objects if object is present in db
     ticker = request.GET['search_query'].upper()
     update_object(ticker)
-    return redirect('/company/?search_query=' + ticker)
+    return HttpResponseRedirect('/company/?search_query=' + ticker)
 

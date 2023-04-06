@@ -136,6 +136,9 @@ def update_object(ticker):
             new_df.to_csv(ARCHIVE_PATH + 'history/' + ticker + '.csv')
         else:
             print("already upgraded history")
+
+        company.latest_update = dt.datetime.now()
+        company.save()
     
     except Exception as e:
             

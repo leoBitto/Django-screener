@@ -9,6 +9,7 @@ class CompanyAdmin(admin.ModelAdmin):
         'sector',
         'industry',
         'country',
+        'latest_update',
     )
 
     list_filter = (
