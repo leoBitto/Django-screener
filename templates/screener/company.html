@@ -1,0 +1,159 @@
+{% extends "screener/base.html" %}
+{% load static %}
+{% block content %}
+
+<div class="m-3 p-3">
+    <header class="d-flex flex-row justify-content-around">
+        <div class="">
+            <h1>{{name}}</h1>
+            <h3> ticker: {{ticker}}</h3>
+        </div>
+        <form action="{% url 'update' %}" method="GET">
+            <input class="d-none" type="text" value={{ticker}} aria-label="Search" name="search_query">
+            <button type="submit" class="btn btn-info btn-lg">Update Info</button>
+            <p>latest update: {{latest_update}}</p>
+        </form>
+        
+    </header>
+    <div class="d-flex flex-row m-auto p-3 justify-content-around">
+        <div class=" col-5 fs-5">
+            <button type="button" class="w-100 btn btn-primary m-1" data-bs-toggle="collapse" data-bs-target="#summary">Summary</button>
+            <div id="summary" class="collapse show">
+                {{summary}}
+            </div>
+        </div>
+        <div class="col-5">
+            <button type="button" class="w-100 btn btn-primary m-1" data-bs-toggle="collapse" data-bs-target="#generalInfo">General Info</button>
+            <div id="generalInfo" class="collapse show">
+                <ul class=" list-group mb-3">
+                    <li class="list-group-item"><span>sector: </span><span>{{sector}}</span></li>
+                    <li class="list-group-item"><span>industry: </span><span>{{industry}}</span></li>
+                    <li class="list-group-item"><span>phone: </span><span>{{phone}}</span></li>
+                    <li class="list-group-item"><span>website: </span><span><a href="{{website}}">{{website}}</a></span></li>
+                    <li class="list-group-item"><span>country: </span><span>{{country}}</span></li>
+                    <li class="list-group-item"><span>state: </span><span>{{state}}</span></li>
+                    <li class="list-group-item"><span>city: </span><span>{{city}}</span></li>
+                    <li class="list-group-item"><span>address: </span><span>{{address}}</span></li>
+                    <li class="list-group-item"><span>employees: </span><span>{{employees}}</span></li>
+                </ul>
+            </div>
+            <button type="button" class="w-100 btn btn-primary m-1" data-bs-toggle="collapse" data-bs-target="#indices">Indices</button>
+            <div id="indices" class="collapse show">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th colspan="2">Indices </th>
+                            <th> Industry Mean </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">Current Ratio (CR) [+, 1.5 - 2.5]: </th>
+                            <td>{{indices.CR}}</td>
+                            <td>{{mean_indices.CR}}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Quick Ratio (QR) [+, 1 - 2]: </th>
+                            <td>{{indices.QR}}</td>
+                            <td>{{mean_indices.QR}}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">fixed asset coverage  [+, >0.7]: </th>
+                            <td>{{indices.fixed_asset_coverage}}</td>
+                            <td>{{mean_indices.fixed_asset_coverage}}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Indebtment Ratio (RI) [-, < 3]: </th>
+                            <td>{{indices.RI}}</td>
+                            <td>{{mean_indices.RI}}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">interest expense coverage [+]: </th>
+                            <td>{{indices.interest_expense_coverage}}</td>
+                            <td>{{mean_indices.interest_expense_coverage}}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Return On Debt (ROD) [-]: </th>
+                            <td>{{indices.ROD}}</td>
+                            <td>{{mean_indices.ROD}}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Return On Equity (ROE) [+]: </th>
+                            <td>{{indices.ROE}}</td>
+                            <td>{{mean_indices.ROE}}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Return On Asset (ROA) [+]: </th>
+                            <td>{{indices.ROA}}</td>
+                            <td>{{mean_indices.ROA}}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Return On Sales (ROS) [+]: </th>
+                            <td>{{indices.ROS}}</td>
+                            <td>{{mean_indices.ROS}}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Return On Investment (ROI) [+]: </th>
+                            <td>{{indices.ROI}}</td>
+                            <td>{{mean_indices.ROI}}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Return On Turnover (ROT) [+]: </th>
+                            <td>{{indices.ROT}}</td>
+                            <td>{{mean_indices.ROT}}</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">active circulating rotation [+]: </th>
+                            <td>{{indices.active_circulating_rotation}}</td>
+                            <td>{{mean_indices.active_circulating_rotation}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<section class="container m-auto">
+        <div class="container w-100 d-flex row-direction">
+            <div class="container w-50">
+                <button type="button" class="w-100 btn btn-primary" data-bs-toggle="collapse" data-bs-target="#balancesheet">Balancesheet</button>
+                <div id="balancesheet" class="collapse">
+                    {{ balancesheet | safe }}
+                </div>
+            </div>
+            
+            <div class="container w-50">
+                <button type="button" class="w-100 btn btn-primary" data-bs-toggle="collapse" data-bs-target="#IncomeStat">Income Statement</button>
+                <div id="IncomeStat" class="collapse">
+                    {{ income_statement | safe }}
+                </div>
+            </div>
+        </div>
+</section>
+
+<section class="plots container m-auto">
+
+        <h1 class="text-center"> Financial Statement </h1>
+        <div class="container w-100 d-flex row-direction">
+            <div class="container w-50">
+                <h2 class="text-center"> Asset & Liabilities </h2>
+                {{ asset_liabilities | safe }}
+            </div>
+            
+            <div class="container w-50">
+                <h2 class="text-center"> Revenue & Income </h2>
+                {{ revenue_income | safe }}
+            </div>
+        </div>
+
+        <h1> Candle Plot </h1>
+        <div class="container w-100">
+            {{ candlestick | safe }}
+        </div>
+</section>
+
+
+
+{% endblock %}
