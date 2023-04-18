@@ -8,7 +8,7 @@
             <h1>{{name}}</h1>
             <h3> ticker: {{ticker}}</h3>
         </div>
-        <form action="{% url 'update' %}" method="GET">
+        <form action="{% url 'screener:update' %}" method="GET">
             <input class="d-none" type="text" value={{ticker}} aria-label="Search" name="search_query">
             <button type="submit" class="btn btn-info btn-lg">Update Info</button>
             <p>latest update: {{latest_update}}</p>

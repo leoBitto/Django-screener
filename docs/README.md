@@ -25,7 +25,7 @@ this app is used inside the project NotFinancialAdvice and it need the following
  2. run the script archive_creator.sh inside the app to create the folder necessary to hold the files
  3. call the collectstatic from manage.py
  4. include the url.py file inside the app in the main project you may want to add some url path inside the ''
-        path('', include(('screener.urls', 'screener'), namespace="screener")),
+      > path('', include(('screener.urls', 'screener'), namespace="screener")),
  5. call the makemigrations / migrate from manage.py Run ``python manage.py migrate screener`` to create the screener models.
 
  6. Start the development server and visit http://127.0.0.1:8000/admin/
