@@ -1,14 +1,15 @@
-{% extends "screener/base.html" %}
+{% extends "website/base.html" %}
 {% load static %}
 
 {% block content %} 
+{% include "screener/navbar.html" %}
+<div class="w-75 m-auto">
+        <div class="m-auto d-flex justify-content-center align-items-center flex-column ">
 
-<div class="w-70 d-flex justify-content-center align-items-center flex-column ">
-
-        <h3> NOT FINANCIAL ADVICE </h3>
-        <h1> it seems that the search for {{req}} hasn't worked out. try again with another ticker: </h1>
-        <p> we have this Error: {{error}} </p>
-
+                <h3> NOT FINANCIAL ADVICE </h3>
+                <h1> it seems that the search for {{req}} hasn't worked out. try again with another ticker: </h1>
+                <p> we have this Error: {{error}} </p>
+        </div>
 </div>
 {% endblock %} 
 

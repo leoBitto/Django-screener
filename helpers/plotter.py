@@ -175,21 +175,16 @@ def plot_balancesheet(df):
     return fig
 
 def plot_income_statement(df):
-    ## in this plot we need to exclude the term TTM, 
+    #eliminate TTM
+    df.drop(columns=[col for col in df.columns if 'TTM' in df[col].values], inplace=True)
     # get revenue
     revenue = df.loc['TotalRevenue'].fillna(0).astype(float).astype(int).tolist()
-    #eliminate TTM
-    del revenue[-1]
 
     #get income
     income = df.loc['NetIncome'].fillna(0).astype(float).astype(int).tolist()
-    #eliminate TTM
-    del income[-1]
 
     x = ["Revenue","Income"] 
     years = pd.to_datetime(df.loc["asOfDate"]).dt.year.tolist()
-    #eliminate TTM
-    del years[-1]
 
     fig = go.Figure(data=[
         go.Bar(name = x[0], x=years, y=revenue, marker_color="goldenrod"),
