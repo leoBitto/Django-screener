@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, HttpResponse, HttpResponseRedirect
 import plotly.io as pi
 import datetime as dt
+from decimal import Decimal
 from datetime import timezone
 from screener.models import *
 from .helpers.db_manager import *
@@ -121,3 +122,31 @@ def update(request):
     update_object(ticker)
     return HttpResponseRedirect('/company/?search_query=' + ticker)
 
+
+
+def add_stock_to_portfolio(request):
+    portfolio = Portfolio.objects.all()
+    if request.method == 'POST':
+        # Ottieni i dettagli dal form
+        company_id = request.POST['company']
+        quantity = int(request.POST['quantity'])
+        purchase_price = Decimal(request.POST['purchase_price'])
+        purchase_commission = Decimal(request.POST['purchase_commission'])
+        purchase_date = datetime.strptime(request.POST['purchase_date'], '%Y-%m-%d')
+
+        # Trova l'azienda dal suo ID
+        company = Company.objects.get(pk=company_id)
+
+        # Aggiungi la nuova azione al portafoglio
+        portfolio.add_stock(company, quantity, purchase_price, purchase_commission, purchase_date)
+
+        # Redirect alla pagina del portafoglio
+        return redirect('screener:portfolio_dashboard')  # Assumi che l'URL sia definito come 'portfolio:portfolio_details'
+    
+    # Se il metodo non è POST o se ci sono errori nel form, visualizza il template di aggiunta stock
+    companies = Company.objects.all()
+    context = {
+        'companies': companies,
+        'portfolio': portfolio,
+            }
+    return render(request, 'screener/portfolio.html', context)

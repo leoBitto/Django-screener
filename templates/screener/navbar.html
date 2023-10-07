@@ -5,16 +5,23 @@
 <nav class="navbar navbar-light bg-light">
     <div class="container-fluid">
         <a class="navbar-brand">NOT FINANCIAL ADVICE</a>
+        <ul class="navbar-nav flex-row">
+            <li class="nav-item px-3">
+                <a class="nav-link" href="{% url 'screener:index' %}">Home</a>
+            </li>
+            <li class="nav-item px-3">
+                <a class="nav-link" href="{% url 'screener:portfolio_dashboard' %}" aria-current="page">Portfolio</a>
+            </li>
+        </ul>
         <form class="d-flex" action="{% url 'screener:company' %}" method="GET">
             <input class="form-control me-2" type="text" placeholder="Search ticker" aria-label="Search" name="search_query">
-            {% comment %} <input class="form-control me-2" type="date" id="start_date" placeholder="Start date" aria-label="Start date" name="start_date">
-            <input class="form-control me-2" type="date" id="end_date" placeholder="End date" aria-label="End date" name="end_date"> {% endcomment %}
             <button class="btn btn-outline-success" type="submit">Search</button>
         </form>
     </div>
 </nav>
-<script >
+<script>
     $('#start_date').val(new Date('2023').toJSON().slice(0,10));    
     $('#end_date').val(new Date().toJSON().slice(0,10));
 </script>
+
 {% endblock %} 

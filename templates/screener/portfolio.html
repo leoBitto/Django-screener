@@ -1,0 +1,63 @@
+{% extends "website/base.html" %}
+{% load static %}
+
+{% block content %} 
+
+{% include "screener/navbar.html" %}
+<div class="container">
+    <h1 class="mt-4">Portfolio Dashboard</h1>
+    
+    <!-- Visualizza le caratteristiche del portfolio -->
+    <h2 class="mt-4">Portfolio Details</h2>
+    <div class="row">
+        <div class="col">
+            <p>Total Value: ${{ portfolio.total_value }}</p>
+            <p>Stock Value: ${{ portfolio.stock_value }}</p>
+            <p>Cash Balance: ${{ portfolio.cash_balance }}</p>
+            <p>ROI: {{ portfolio.calculate_roi }}%</p>
+        </div>
+    </div>
+    
+    <!-- Mostra la lista delle azioni presenti nel portfolio -->
+    <h2 class="mt-4">Stocks in Portfolio</h2>
+    <div class="row">
+        <div class="col">
+            <ul class="list-group">
+                {% for stock in portfolio.stocks.all %}
+                    <li class="list-group-item">{{ stock.company.name }} - Quantity: {{ stock.quantity }}</li>
+                {% endfor %}
+            </ul>
+            {% if portfolio.stocks.count == 0 %}
+                <p class="mt-2">No stocks available in the portfolio.</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Aggiungi una nuova azione al portfolio -->
+    <h2 class="mt-4">Add Stock to Portfolio</h2>
+    <div class="row">
+        <div class="col">
+            <form method="post" action="{% url 'screener:portfolio_dashboard' %}" class="mb-4">
+                {% csrf_token %}
+                <label for="company" class="form-label">Company:</label>
+                <select name="company" id="company" class="form-select">
+                    <option value="" selected disabled>Select a company</option>
+                    {% for company in companies %}
+                        <option value="{{ company.id }}">{{ company.name }}</option>
+                    {% endfor %}
+                </select>
+                <label for="quantity" class="form-label">Quantity:</label>
+                <input type="number" name="quantity" id="quantity" class="form-control">
+                <label for="purchase_price" class="form-label">Purchase Price:</label>
+                <input type="number" name="purchase_price" id="purchase_price" class="form-control">
+                <label for="purchase_commission" class="form-label">Purchase Commission:</label>
+                <input type="number" name="purchase_commission" id="purchase_commission" class="form-control">
+                <label for="purchase_date" class="form-label">Purchase Date:</label>
+                <input type="date" name="purchase_date" id="purchase_date" class="form-control">
+                <button type="submit" class="btn btn-primary mt-2">Add Stock</button>
+            </form>
+        </div>
+    </div>
+</div>
+   
+{% endblock %}
