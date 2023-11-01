@@ -11,7 +11,7 @@ class PortfolioAdmin(admin.ModelAdmin):
     list_display = ('name', 'cash_balance', 'stock_value', 'total_value')
     search_fields = ('name',)
     list_filter = ('start_date',)
-    readonly_fields = ('stock_value', 'total_value', 'returns')
+    readonly_fields = ('stock_value', 'total_value',)
 
 class StockInPortfolioAdmin(admin.ModelAdmin):
     list_display = ('company', 'related_portfolio', 'quantity', 'price')
