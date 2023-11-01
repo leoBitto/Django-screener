@@ -10,46 +10,46 @@ def calculate_indices(financials, balancesheet):
     #### TRY TO GET THE PARAMETERS FROM BALANCESHEET OR FINANCIALS OR
     #### SET THE VALUE AS float("NaN") to make the calculus of indices 
     #### much easier to handle, avoid errors
-    try: current_assets = float(balancesheet.loc['CurrentAssets'][0])
+    try: current_assets = float(balancesheet.loc['CurrentAssets'].iloc[0])
     except KeyError: current_assets = float("NaN")     #1
     
-    try: current_liabilities = float(balancesheet.loc['CurrentLiabilities'][0])#2
+    try: current_liabilities = float(balancesheet.loc['CurrentLiabilities'].iloc[0])#2
     except KeyError: current_liabilities = float("NaN")     
 
-    try: inventory = float(balancesheet.loc['Inventory'][0])                   #3
+    try: inventory = float(balancesheet.loc['Inventory'].iloc[0])                   #3
     except KeyError: inventory = float("NaN")     
     
-    try: stockholder_equity = float(balancesheet.loc['StockholdersEquity'][0]) #4
+    try: stockholder_equity = float(balancesheet.loc['StockholdersEquity'].iloc[0]) #4
     except KeyError: stockholder_equity = float("NaN")     
     
-    try: total_debt = float(balancesheet.loc['TotalDebt'][0])                  #6
+    try: total_debt = float(balancesheet.loc['TotalDebt'].iloc[0])                  #6
     except KeyError: total_debt = float("NaN")     
     
-    try: total_assets = float(balancesheet.loc['TotalAssets'][0])              #12
+    try: total_assets = float(balancesheet.loc['TotalAssets'].iloc[0])              #12
     except KeyError: total_assets = float("NaN")     
     
-    try: net_sales = float(financials.loc['OperatingRevenue'][0])              #7
+    try: net_sales = float(financials.loc['OperatingRevenue'].iloc[0])              #7
     except KeyError: net_sales = float("NaN")     
     
-    try: interest_expense = float(financials.loc['InterestExpense'][0])        #8
+    try: interest_expense = float(financials.loc['InterestExpense'].iloc[0])        #8
     except KeyError: interest_expense = float("NaN")     
     
-    try: invested_capital = float(balancesheet.loc['InvestedCapital'][0])      #9
+    try: invested_capital = float(balancesheet.loc['InvestedCapital'].iloc[0])      #9
     except KeyError: invested_capital = float("NaN")     
     
-    try: net_income = float(financials.loc['NetIncome'][0])                    #10
+    try: net_income = float(financials.loc['NetIncome'].iloc[0])                    #10
     except KeyError: net_income = float("NaN")     
     
-    try: EBIT = float(financials.loc['EBIT'][0]) 
+    try: EBIT = float(financials.loc['EBIT'].iloc[0]) 
     except KeyError: EBIT = float("NaN")     
     
-    try: intangible_assets = float(balancesheet.loc['Goodwill'][0])
+    try: intangible_assets = float(balancesheet.loc['Goodwill'].iloc[0])
     except KeyError: intangible_assets = float("NaN")    
     
-    try: short_term_debt = float(balancesheet.loc['TotalDebt'][0])
+    try: short_term_debt = float(balancesheet.loc['TotalDebt'].iloc[0])
     except KeyError: short_term_debt = float("NaN")     
     
-    try: long_term_debt = float(balancesheet.loc['LongTermDebt'][0])
+    try: long_term_debt = float(balancesheet.loc['LongTermDebt'].iloc[0])
     except KeyError: long_term_debt = float("NaN")     
 
     

@@ -1,29 +1,33 @@
-from django.shortcuts import render, redirect, HttpResponse, HttpResponseRedirect
+from django.shortcuts import render, redirect, HttpResponseRedirect, get_object_or_404
 import plotly.io as pi
 import datetime as dt
-from decimal import Decimal
-from datetime import timezone
 from screener.models import *
 from .helpers.db_manager import *
 from .helpers.plotter import *
 from .helpers.index_calculator import *
+from django.contrib import messages
+from .forms import TransactionStockForm, ManageCashForm
 
 # Create your views here.
 def index(request):
-    print(request)
-    context={
+    ## add news 
 
+    portfolios = Portfolio.objects.all()
+
+    context={
+        'portfolios':portfolios
     }
-    return render(request, 'screener/landing.html', context)
+    return render(request, 'screener/overview.html', context)
 
 
 def company(request):
+    '''
+    Gives an overview of a single company,
+    if not in the db it download it
+    '''
+
     try:
         ticker = request.GET['search_query'].upper()
-        #start_date = dt.datetime.strptime(request.GET['start_date'], '%Y-%m-%d').replace(tzinfo=timezone.utc).date()
-
-        #start_date = request.GET['start_date']
-        #end_date = request.GET['end_date']
 
         company = Company.objects.filter(ticker = ticker)
 
@@ -70,13 +74,11 @@ def company(request):
     asset_liabilities = pi.to_html(
         plot_balancesheet(balancesheet), 
         full_html=False, 
-        #default_height="800px"
         )
 
     revenue_income = pi.to_html(
         plot_income_statement(income_statement), 
         full_html=False, 
-        #default_height="800px"
         )
 
     context={
@@ -123,30 +125,193 @@ def update(request):
     return HttpResponseRedirect('/company/?search_query=' + ticker)
 
 
-
-def add_stock_to_portfolio(request):
-    portfolio = Portfolio.objects.all()
+def create_portfolio(request):
     if request.method == 'POST':
-        # Ottieni i dettagli dal form
-        company_id = request.POST['company']
-        quantity = int(request.POST['quantity'])
-        purchase_price = Decimal(request.POST['purchase_price'])
-        purchase_commission = Decimal(request.POST['purchase_commission'])
-        purchase_date = datetime.strptime(request.POST['purchase_date'], '%Y-%m-%d')
+        name = request.POST.get('name')
+        start_date = request.POST.get('start_date')  # Assicurati che il form abbia un campo 'start_date'
+        cash_balance = request.POST.get('cash_balance')
+                
+        
+        # Crea un nuovo portfolio
+        portfolio = Portfolio.objects.create(
+            name=name, 
+            start_date=start_date,
+            cash_balance = cash_balance
+            )
 
-        # Trova l'azienda dal suo ID
-        company = Company.objects.get(pk=company_id)
+        # Reindirizza alla pagina di dettaglio del nuovo portfolio
+        return redirect('screener:portfolio_details', pk=portfolio.pk)
 
-        # Aggiungi la nuova azione al portafoglio
-        portfolio.add_stock(company, quantity, purchase_price, purchase_commission, purchase_date)
+    # Se il metodo non è POST, visualizza il form per la creazione
+    return render(request, 'screener/create_portfolio.html')
 
-        # Redirect alla pagina del portafoglio
-        return redirect('screener:portfolio_dashboard')  # Assumi che l'URL sia definito come 'portfolio:portfolio_details'
+
+def eliminate_portfolio(request, pk):
+                    
+    # elimina portfolio
+    Portfolio.objects.filter(pk=pk).delete()
+
+    # Reindirizza alla pagina iniziale
+    return redirect('screener:index')
+
+
+
+def portfolio_details(request, pk):
+    '''
+    Gives an overview of the portfolio
+    '''
+    form_stocks = TransactionStockForm()
+    form_cash = ManageCashForm()
+    portfolio = Portfolio.objects.get(pk=pk)
     
-    # Se il metodo non è POST o se ci sono errori nel form, visualizza il template di aggiunta stock
-    companies = Company.objects.all()
-    context = {
-        'companies': companies,
-        'portfolio': portfolio,
-            }
+    context={
+        "portfolio":portfolio,
+        'companies': Company.objects.all(),  # Aggiungi le aziende disponibili
+        'form_stocks':form_stocks,
+        'form_cash':form_cash,
+    }
+
     return render(request, 'screener/portfolio.html', context)
+
+
+def manage_stock(request, pk):
+    portfolio = get_object_or_404(Portfolio, pk=pk)
+
+    if request.method == 'POST':
+        form = TransactionStockForm(request.POST)
+
+        if form.is_valid():
+            company_name = form.cleaned_data['company']
+            quantity = form.cleaned_data['quantity']
+            price = form.cleaned_data['price']
+            commission = form.cleaned_data['commission']
+            date = form.cleaned_data['transaction_date']
+            transaction_type = form.cleaned_data['transaction_type']
+
+            if transaction_type == 'BUY':
+                company = get_object_or_404(Company, name=company_name)
+                total_purchase_cost = (quantity * price) + commission
+
+                if total_purchase_cost <= portfolio.cash_balance:
+                    try:
+                        stock = StockInPortfolio.objects.get(related_portfolio=portfolio, company=company)
+                    except StockInPortfolio.DoesNotExist:
+                        stock = None
+
+                    if stock:
+                        stock.quantity += quantity
+                        stock.price = (stock.price + price) / 2
+                        stock.save()
+                    else:
+                        stock = StockInPortfolio.objects.create(
+                            related_portfolio=portfolio,
+                            company=company,
+                            quantity=quantity,
+                            price=price,
+                        )
+
+                    StockTransaction.objects.create(
+                        stock=stock,
+                        transaction_type='BUY',
+                        quantity=quantity,
+                        price=price,
+                        commission=commission,
+                        transaction_date=date
+                    )
+
+                    # Aggiornamento dei valori del portafoglio
+                    portfolio.cash_balance -= total_purchase_cost
+                    tot_stock_val = 0
+                    for stock in StockInPortfolio.objects.filter(related_portfolio=portfolio):
+                        tot_stock_val = stock.quantity * stock.price
+                    portfolio.stock_value = tot_stock_val
+                    portfolio.total_value = portfolio.cash_balance + portfolio.stock_value
+                    portfolio.save()
+
+                else:
+                    messages.error(request, 'Fondi insufficienti per acquistare queste azioni.')
+            
+            else: # transaction_type == 'SELL'
+                
+                company = get_object_or_404(StockInPortfolio, company__name=company_name, related_portfolio=portfolio)
+                
+                if quantity <= company.quantity:
+                    company.quantity -= quantity
+                    company.save()
+
+                    StockTransaction.objects.create(
+                        stock=company,
+                        transaction_type='SELL',
+                        quantity=quantity,
+                        price=price,
+                        commission=commission,
+                        transaction_date=date
+                    )
+
+                    # Aggiornamento dei valori del portafoglio
+                    portfolio.cash_balance += (quantity * price - commission)
+                    tot_stock_val = 0
+                    for stock in StockInPortfolio.objects.filter(related_portfolio=portfolio):
+                        tot_stock_val = stock.quantity * stock.price
+                    portfolio.stock_value = tot_stock_val
+                    portfolio.total_value = portfolio.cash_balance + portfolio.stock_value
+                    portfolio.save()
+
+                    # Se la quantità rimanente è zero, elimina l'oggetto StockInPortfolio
+                    if company.quantity == 0:
+                       company.delete()
+
+                else:
+                    messages.error(request, 'La quantità venduta supera la quantità disponibile.')
+
+
+    else:
+        form = TransactionStockForm()
+
+    context = {
+        'portfolio': portfolio,
+        'companies': Company.objects.all(),
+        'form_stocks': form,
+        'form_cash': ManageCashForm(),
+    }
+
+    return render(request, 'screener/portfolio.html', context)
+
+
+def manage_cash(request, pk):
+    portfolio = get_object_or_404(Portfolio, pk=pk)
+
+    if request.method == 'POST':
+        form = ManageCashForm(request.POST)
+
+        if form.is_valid():
+            amount = form.cleaned_data['amount']
+            transaction_type = form.cleaned_data['transaction_type']
+            commission = form.cleaned_data['commission']
+
+            if transaction_type == 'DEPOSIT':
+                portfolio.cash_balance += (amount - commission)
+                portfolio.total_investment += (amount - commission)
+            elif transaction_type == 'WITHDRAW':
+                if (amount + commission) <= portfolio.cash_balance:
+                    portfolio.cash_balance -= (amount + commission)
+                    portfolio.total_investment -= (amount + commission)  # Aggiornamento dell'investimento iniziale
+                else:
+                    messages.error(request, 'La quantità richiesta supera la quantità disponibile.')
+
+            portfolio.total_value = portfolio.cash_balance + portfolio.stock_value
+            portfolio.save()
+
+    else:
+        form = ManageCashForm()
+
+    context = {
+        'portfolio': portfolio,
+        'companies': Company.objects.all(),
+        'form_stocks': TransactionStockForm(),
+        'form_cash': form,
+    }
+
+    return render(request, 'screener/portfolio.html', context)
+
+

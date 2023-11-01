@@ -111,61 +111,7 @@ class Portfolio(models.Model):
     total_value = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     start_date = models.DateField()  
     returns = models.TextField(blank=True)
-
-
-    def calculate_roi(self):
-        total_investment = sum(stock.purchase_price * stock.quantity for stock in self.stocks.all())
-        
-        if total_investment == 0:
-            return 0  # Evita la divisione per zero
-        
-        current_value = self.stock_value
-        roi = ((current_value - total_investment) / total_investment) * 100
-        return roi
-
-    def total_return(self):
-        initial_value = self.total_value - self.cash_balance
-        final_value = self.total_value
-        
-        if initial_value == 0:
-            return 0  # Evita la divisione per zero
-        
-        return ((final_value - initial_value) / initial_value) * 100
-
-    def average_annual_return(self):
-        initial_value = self.total_value - self.cash_balance
-        final_value = self.total_value
-        years_passed = (datetime.now().date() - self.start_date).days / 365
-        
-        if initial_value == 0 or years_passed == 0:
-            return 0  # Evita la divisione per zero
-        
-        return ((final_value - initial_value) / initial_value) / years_passed * 100
-    
-    def calculate_portfolio_risk(self):
-        items = self.items.all()
-        total_risk = 0
-        for item in items:
-            company_risk = item.company.calculate_standard_deviation()
-            total_risk += (company_risk * item.quantity) ** 2
-        portfolio_risk = np.sqrt(total_risk)
-        return portfolio_risk
-
-    def calculate_portfolio_returns(self):
-        stocks = self.stocks.all()
-        returns = []
-
-        for i in range(1, len(stocks)):
-            prev_stock = stocks[i - 1]
-            current_stock = stocks[i]
-
-            if prev_stock.total_value != 0:
-                return_percentage = ((current_stock.total_value - prev_stock.total_value) / prev_stock.total_value) * 100
-                returns.append(return_percentage)
-
-        self.returns = json.dumps(returns)
-        self.save()
-
+    total_investment = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     def __str__(self):
         return self.name
@@ -175,52 +121,24 @@ class StockInPortfolio(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     related_portfolio = models.ForeignKey(Portfolio, on_delete=models.CASCADE, related_name='stocks')
     quantity = models.PositiveIntegerField()
-    purchase_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    purchase_commission = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    purchase_date = models.DateField()
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    
 
     def __str__(self):
-        return f"{self.company.name} - {self.quantity}"
+        return f"{self.company.name} - {self.quantity} - {self.price}"
 
-    @property
-    def total_purchase_cost(self):
-        if self.purchase_price is not None and self.purchase_commission is not None and self.quantity is not None:
-            return (self.quantity * self.purchase_price) + self.purchase_commission
-        else:
-            return 0
-        
-    @property
-    def unrealized_pnl(self):
-        if self.company.current_price() is not None:
-            current_price = Decimal(self.company.current_price())  # Converti in Decimal
-            return (current_price - self.purchase_price - self.purchase_commission) * self.quantity
-        return Decimal(0)
 
-    def pmc(self):
-        if self.quantity is not None:
-            return self.total_purchase_cost / self.quantity if self.quantity > 0 else 0
-        else:
-            return 0
+class StockTransaction(models.Model):
+    stock = models.ForeignKey(StockInPortfolio, on_delete=models.CASCADE)
+    transaction_type = models.CharField(max_length=5, choices=[('BUY', 'Buy'), ('SELL', 'Sell')])
+    quantity = models.PositiveIntegerField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    commission = models.DecimalField(max_digits=10, decimal_places=2)
+    transaction_date = models.DateField()
 
-    def sell(self, quantity_to_sell):
-        if self.quantity is not None and quantity_to_sell is not None:
-            if quantity_to_sell <= self.quantity:
-                self.quantity -= quantity_to_sell
-                self.save()
+    def __str__(self):
+        return f"{self.transaction_type} - {self.quantity}"
 
-                if self.quantity == 0:
-                    self.delete()
-                
-                # Aggiorna il portafoglio
-                self.related_portfolio.update_portfolio_values()
 
-                return True
-            else:
-                return False
-        else:
-            return False  # Ritorna False se uno dei valori è None
-        
 
-    def save(self, *args, **kwargs):
-            super().save(*args, **kwargs)
 
