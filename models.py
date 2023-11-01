@@ -109,12 +109,26 @@ class Portfolio(models.Model):
     cash_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     stock_value = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     total_value = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    start_date = models.DateField()  
-    returns = models.TextField(blank=True)
+    start_date = models.DateField() 
     total_investment = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     def __str__(self):
         return self.name
+    
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        # Calcola e crea un nuovo log ogni volta che il portafoglio viene salvato
+        value = self.cash_balance + self.stock_value
+        PortfolioValueLog.objects.create(portfolio=self, value=value)
+
+
+class PortfolioValueLog(models.Model):
+    portfolio = models.ForeignKey('Portfolio', on_delete=models.CASCADE)
+    value = models.DecimalField(max_digits=10, decimal_places=2)
+    date = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.portfolio.name} - {self.date}"
 
 
 class StockInPortfolio(models.Model):
