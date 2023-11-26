@@ -2,10 +2,17 @@
 {% load static %}
 {% block content %}
 {% include "screener/navbar.html" %}
+<style>
+
+    /* Stile personalizzato per il colore arancione del bottone */
+    .btn-custom {
+        color: #000; /* Testo nero */
+        background-color: #FFD180; /* Colore arancione personalizzato */
+        border-color: #FFD180; /* Colore del bordo */
+    }
+    
+  </style> 
     <div class="container my-5 d-flex flex-column justify-content-around align-items-center">
-        <div class="my-2 ">
-            <a class="btn btn-primary" href="{% url 'screener:create_portfolio' %}">Crea Portfolio</a>
-        </div>
         <div class="d-flex flex-column flex-md-row justify-content-around flex-wrap">
         {% for portfolio in portfolios %}
 
@@ -13,7 +20,7 @@
                 <div class="card-body">
                     <h5 class="card-title">{{ portfolio.name }}</h5>
                     <p class="card-text">{{ portfolio.total_value }}</p>
-                    <a class="btn btn-primary" href="{% url 'screener:portfolio_details' portfolio.pk %}">Details</a>
+                    <a class="btn btn-custom" href="{% url 'transactions:portfolio_details' portfolio.pk %}">Details</a>
                 </div>  
             </div>
         {% endfor %}

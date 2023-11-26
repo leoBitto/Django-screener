@@ -1,10 +1,8 @@
 from django.db import models
 from django.conf import settings
 import os
-from decimal import Decimal
+
 from django.core.files.storage import FileSystemStorage
-from datetime import datetime
-import json
 import yfinance as yf
 import pandas as pd
 import numpy as np
@@ -101,58 +99,5 @@ class Company(models.Model):
 
     def __str__(self):
         return self.name
-
-
-class Portfolio(models.Model):
-    name = models.CharField(max_length=50)
-    related_stocks = models.ManyToManyField('StockInPortfolio', blank=True)
-    cash_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    stock_value = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    total_value = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    start_date = models.DateField() 
-    total_investment = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-
-    def __str__(self):
-        return self.name
-    
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        # Calcola e crea un nuovo log ogni volta che il portafoglio viene salvato
-        value = self.cash_balance + self.stock_value
-        PortfolioValueLog.objects.create(portfolio=self, value=value)
-
-
-class PortfolioValueLog(models.Model):
-    portfolio = models.ForeignKey('Portfolio', on_delete=models.CASCADE)
-    value = models.DecimalField(max_digits=10, decimal_places=2)
-    date = models.DateField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.portfolio.name} - {self.date}"
-
-
-class StockInPortfolio(models.Model):
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
-    related_portfolio = models.ForeignKey(Portfolio, on_delete=models.CASCADE, related_name='stocks')
-    quantity = models.PositiveIntegerField()
-    price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    
-
-    def __str__(self):
-        return f"{self.company.name} - {self.quantity} - {self.price}"
-
-
-class StockTransaction(models.Model):
-    stock = models.ForeignKey(StockInPortfolio, on_delete=models.CASCADE)
-    transaction_type = models.CharField(max_length=5, choices=[('BUY', 'Buy'), ('SELL', 'Sell')])
-    quantity = models.PositiveIntegerField()
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-    commission = models.DecimalField(max_digits=10, decimal_places=2)
-    transaction_date = models.DateField()
-
-    def __str__(self):
-        return f"{self.transaction_type} - {self.quantity}"
-
-
 
 

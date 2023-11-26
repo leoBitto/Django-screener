@@ -1,7 +1,17 @@
 
 {% load static %}
 
-{% block navbar %} 
+{% block navbar %}
+<style>
+
+    /* Stile personalizzato per il colore arancione del bottone */
+    .btn-custom {
+        color: #000; /* Testo nero */
+        background-color: #FFD180; /* Colore arancione personalizzato */
+        border-color: #FFD180; /* Colore del bordo */
+    }
+    
+  </style> 
 <nav class="navbar navbar-light bg-light">
     <div class="container-fluid">
         <a class="navbar-brand">NOT FINANCIAL ADVICE</a>
@@ -13,7 +23,7 @@
         </ul>
         <form class="d-flex" action="{% url 'screener:company' %}" method="GET">
             <input class="form-control me-2" type="text" placeholder="Search ticker" aria-label="Search" name="search_query">
-            <button class="btn btn-outline-success" type="submit">Search</button>
+            <button class="btn btn-custom" type="submit">Search</button>
         </form>
     </div>
 </nav>

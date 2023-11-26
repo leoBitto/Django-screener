@@ -3,7 +3,16 @@
 {% block content %}
 
 {% include "screener/navbar.html" %}
+<style>
 
+    /* Stile personalizzato per il colore arancione del bottone */
+.btn-custom {
+    color: #000; /* Testo nero */
+    background-color: #FFD180; /* Colore arancione personalizzato */
+    border-color: #FFD180; /* Colore del bordo */
+}
+
+</style> 
 <div class="m-3 p-3">
     <header class="d-flex flex-row justify-content-around">
         <div class="">
@@ -12,20 +21,20 @@
         </div>
         <form action="{% url 'screener:update' %}" method="GET">
             <input class="d-none" type="text" value={{ticker}} aria-label="Search" name="search_query">
-            <button type="submit" class="btn btn-info btn-lg">Update Info</button>
+            <button type="submit" class="btn btn-custom btn-lg">Update Info</button>
             <p>latest update: {{latest_update}}</p>
         </form>
-        
     </header>
-    <div class="d-flex flex-row m-auto p-3 justify-content-around">
-        <div class=" col-5 fs-5">
-            <button type="button" class="w-100 btn btn-primary m-1" data-bs-toggle="collapse" data-bs-target="#summary">Summary</button>
+
+    <div class="d-flex flex-column flex-lg-row m-auto p-3 justify-content-around">
+        <div class="col-12 col-lg-4 p-2">
+            <button type="button" class="w-100 btn btn-custom m-1" data-bs-toggle="collapse" data-bs-target="#summary">Summary</button>
             <div id="summary" class="collapse show">
                 {{summary}}
             </div>
         </div>
-        <div class="col-5">
-            <button type="button" class="w-100 btn btn-primary m-1" data-bs-toggle="collapse" data-bs-target="#generalInfo">General Info</button>
+        <div class="col-12 col-lg-4 p-2">
+            <button type="button" class="w-100 btn btn-custom m-1" data-bs-toggle="collapse" data-bs-target="#generalInfo">General Info</button>
             <div id="generalInfo" class="collapse show">
                 <ul class=" list-group mb-3">
                     <li class="list-group-item"><span>sector: </span><span>{{sector}}</span></li>
@@ -39,7 +48,9 @@
                     <li class="list-group-item"><span>employees: </span><span>{{employees}}</span></li>
                 </ul>
             </div>
-            <button type="button" class="w-100 btn btn-primary m-1" data-bs-toggle="collapse" data-bs-target="#indices">Indices</button>
+        </div>
+        <div class="col-12 col-lg-4 p-2">
+            <button type="button" class="w-100 btn btn-custom m-1" data-bs-toggle="collapse" data-bs-target="#indices">Indices</button>
             <div id="indices" class="collapse show">
                 <table class="table table-sm">
                     <thead>
@@ -118,33 +129,33 @@
 </div>
 
 <section class="container m-auto">
-        <div class="container w-100 d-flex row-direction">
-            <div class="container w-50">
-                <button type="button" class="w-100 btn btn-primary" data-bs-toggle="collapse" data-bs-target="#balancesheet">Balancesheet</button>
-                <div id="balancesheet" class="collapse">
+        <div class="container w-100 d-flex flex-column flex-lg-row">
+            <div class="container ">
+                <button type="button" class="w-100 btn btn-custom" data-bs-toggle="collapse" data-bs-target="#balancesheet">Balancesheet</button>
+                <div id="balancesheet" class="collapse col-12 col-lg-6">
                     {{ balancesheet | safe }}
                 </div>
             </div>
             
-            <div class="container w-50">
-                <button type="button" class="w-100 btn btn-primary" data-bs-toggle="collapse" data-bs-target="#IncomeStat">Income Statement</button>
-                <div id="IncomeStat" class="collapse">
+            <div class="container ">
+                <button type="button" class="w-100 btn btn-custom" data-bs-toggle="collapse" data-bs-target="#IncomeStat">Income Statement</button>
+                <div id="IncomeStat" class="collapse col-12 col-lg-6">
                     {{ income_statement | safe }}
                 </div>
             </div>
         </div>
 </section>
 
-<section class="plots container m-auto">
+<section class="plots container m-auto mt-4">
 
         <h1 class="text-center"> Financial Statement </h1>
-        <div class="container w-100 d-flex row-direction">
-            <div class="container w-50">
+        <div class="container w-100 d-flex flex-column flex-lg-row">
+            <div class="container col-12 col-lg-6">
                 <h2 class="text-center"> Asset & Liabilities </h2>
                 {{ asset_liabilities | safe }}
             </div>
             
-            <div class="container w-50">
+            <div class="container col-12 col-lg-6">
                 <h2 class="text-center"> Revenue & Income </h2>
                 {{ revenue_income | safe }}
             </div>
